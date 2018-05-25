@@ -9,7 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/tokenizer.hpp>
+//#include <boost/tokenizer.hpp>
 #include "random_help.hpp"
 
 namespace merak {
@@ -39,6 +39,7 @@ bool contains(const ITEM_CONTAINER& container, const ITEM& item)
 
 std::vector<std::string> separe(const std::string& content, const std::string& separator)
 {
+/*	
 	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 	boost::char_separator<char> sep(separator.c_str());
 	tokenizer tokens(content, sep);
@@ -47,6 +48,20 @@ std::vector<std::string> separe(const std::string& content, const std::string& s
 	
 	std::copy(std::begin(tokens), std::end(tokens), std::back_inserter(items));
 	
+	return items;
+*/
+//std::cout << "content : " << content << "\n";
+    std::istringstream iss(content);
+	
+	std::vector<std::string> items;
+	
+    std::copy(
+		std::istream_iterator<std::string>(iss),
+		std::istream_iterator<std::string>(),
+		std::back_inserter(items));
+
+//std::cout << "items.size() : " << items.size() << "\n";
+		
 	return items;
 }
 
