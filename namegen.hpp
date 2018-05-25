@@ -4,12 +4,12 @@
 #define _NAMEGEN_HPP
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
-//#include <boost/tokenizer.hpp>
 #include "random_help.hpp"
 
 namespace merak {
@@ -25,32 +25,15 @@ std::string seq_to_string(const seq_type& seq, const std::string& separator = ",
 	
 	return s.substr(0, s.size() - separator.size());
 }
-/*
-bool contains(const std::string& s1, const std::string& s2)
-{
-	return s1.find(s2, 0) != std::string::npos;
-}
-*/
+
 template<class ITEM_CONTAINER, class ITEM>
 bool contains(const ITEM_CONTAINER& container, const ITEM& item)
 {
 	return std::find(std::begin(container), std::end(container), item) != std::end(container);
 }
 
-std::vector<std::string> separe(const std::string& content, const std::string& separator)
+std::vector<std::string> separate(const std::string& content, const std::string& separator)
 {
-/*	
-	typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-	boost::char_separator<char> sep(separator.c_str());
-	tokenizer tokens(content, sep);
-	
-	std::vector<std::string> items;
-	
-	std::copy(std::begin(tokens), std::end(tokens), std::back_inserter(items));
-	
-	return items;
-*/
-//std::cout << "content : " << content << "\n";
     std::istringstream iss(content);
 	
 	std::vector<std::string> items;
@@ -59,8 +42,6 @@ std::vector<std::string> separe(const std::string& content, const std::string& s
 		std::istream_iterator<std::string>(iss),
 		std::istream_iterator<std::string>(),
 		std::back_inserter(items));
-
-//std::cout << "items.size() : " << items.size() << "\n";
 		
 	return items;
 }
@@ -93,7 +74,6 @@ bool ends_with(const std::string& s1_, const std::string& s2_);
 std::vector<std::string> common_initials(
 	const std::vector<std::string>& source_)
 {
-
 	typedef std::vector<std::string> source_type;
 
 	source_type result;
@@ -156,20 +136,15 @@ std::vector<std::string> common_initials(
 		} // for(i2 = i1 + 1; i2 < _source.end(); ++i2)
 
 	} // for(i1 = _source.begin(); i1 < _source.end(); ++i1)
-
+		
 	return result;
-
 }
 
 std::vector<std::string> common_finals(const std::vector<std::string>& source_)
 {
-
 	typedef std::vector<std::string> source_type;
 
 	source_type result;
-
-//	list<char> v1;
-//	string str1;
 
 	// per ogni stringa *i1 nel vector _source
 	for(
@@ -229,7 +204,6 @@ std::vector<std::string> common_finals(const std::vector<std::string>& source_)
 	} // for(i1 = _source.begin(); i1 < _source.end(); ++i1)
 
 	return result;
-
 }
 
 void left_part(std::vector<std::string>& _names, std::vector<std::string>& _left_part, std::vector<std::string>& _right_part)
@@ -244,7 +218,6 @@ std::vector<std::string> middle_parts(
 	const std::vector<std::string>& prefixes_, 
 	const std::vector<std::string>& subfixes_)
 {
-
 	typedef std::vector<std::string> source_type;
 
 	source_type result;
@@ -316,10 +289,9 @@ std::string new_lexic(
 	const std::string& lexic_, 
 	const int& n_)
 {
-
 	typedef std::vector<std::string> source_type;
 
-	source_type lexic_words(merak::separe(lexic_, " "));
+	source_type lexic_words(merak::separate(lexic_, " "));
 	source_type initials(common_initials(lexic_words));
 
 	std::string s_initials(merak::seq_to_string(initials, " "));
@@ -328,6 +300,7 @@ std::string new_lexic(
 	source_type middles(middle_parts(lexic_words, initials, finals));
 	source_type new_lexic_words(new_words(n_, initials, middles, finals));
 	std::string result(merak::seq_to_string(new_lexic_words, " "));
+
 	return result;
 
 }
@@ -338,18 +311,16 @@ std::vector<std::string> new_words(
 	const std::vector<std::string>& middles_,
 	const std::vector<std::string>& finals_)
 {
-
 	std::vector<std::string> result;
 
 	int s_in(initials_.size());
 	int s_mid(middles_.size());
 	int s_fin(finals_.size());
 	
-	auto rgen1 = random_help::rand_int(0, s_in, true);
-	auto rgen2 = random_help::rand_int(0, s_mid, true);
-	auto rgen3 = random_help::rand_int(0, s_fin, true);
+	auto rgen1 = random_help::rand_int(0, std::max(0, s_in - 1), true);
+	auto rgen2 = random_help::rand_int(0, std::max(0, s_mid - 1), true);
+	auto rgen3 = random_help::rand_int(0, std::max(0, s_fin - 1), true);
 	
-
 	for(
 		int i(0); 
 		i < n_; 
@@ -360,10 +331,12 @@ std::vector<std::string> new_words(
 		int r1 = rgen1();
 		int r2 = rgen2();
 		int r3 = rgen3();
+		
+		if(!initials_.empty()) str1.append(initials_[r1]);
+		
+		if(!middles_.empty()) str1.append(middles_[r2]);
 
-		str1.append(initials_[r1]);
-		str1.append(middles_[r2]);
-		str1.append(finals_[r3]);
+		if(!finals_.empty()) str1.append(finals_[r3]);
 
 		if(!merak::contains(result, str1)) {
 
@@ -372,9 +345,8 @@ std::vector<std::string> new_words(
 		} // if(!contains(_answer, str1))
 
 	} // for(i = 0; i < _num; ++i)
-
+		
 	return result;
-
 }
 
 bool begins_with(const std::string& s1_, const std::string& s2_)
@@ -394,6 +366,7 @@ bool begins_with(const std::string& s1_, const std::string& s2_)
 			return false;
 		}
 	}
+
 	return true;
 }
 
@@ -415,6 +388,7 @@ bool ends_with(const std::string& s1_, const std::string& s2_)
 			return false;
 		}
 	}
+	
 	return true;
 }
 
